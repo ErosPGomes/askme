@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { CATEGORIES } from "../game/categories";
 import type { CategoryId } from "../game/types";
 import { navigate } from "../hooks/useHashRoute";
@@ -11,12 +11,18 @@ interface TopBarProps {
   right?: ReactNode;
 }
 
+/**
+ * Confirmação inline em vez de window.confirm: diálogos nativos são bloqueados em iframes
+ * sandbox (retornam false sem exibir nada) e não seguem o visual do app.
+ */
 export function TopBar({ title, confirmLeave, right }: TopBarProps) {
+  const [asking, setAsking] = useState(false);
   function back() {
-    if (confirmLeave && !window.confirm(confirmLeave)) return;
-    navigate("home");
+    if (confirmLeave) setAsking(true);
+    else navigate("home");
   }
   return (
+    <>
     <header className="topbar">
       <button type="button" className="icon-btn" onClick={back} aria-label="Voltar ao início">
         <BackIcon />
@@ -24,6 +30,20 @@ export function TopBar({ title, confirmLeave, right }: TopBarProps) {
       <h1 className="topbar__title">{title}</h1>
       <div className="topbar__right">{right}</div>
     </header>
+    {asking && confirmLeave && (
+      <div className="leave" role="alertdialog" aria-labelledby="leave-text">
+        <p id="leave-text" className="leave__text">{confirmLeave}</p>
+        <div className="leave__actions">
+          <button type="button" className="btn btn--ghost btn--sm" onClick={() => setAsking(false)} autoFocus>
+            Continuar jogando
+          </button>
+          <button type="button" className="btn btn--danger btn--sm" onClick={() => navigate("home")}>
+            Sair
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 

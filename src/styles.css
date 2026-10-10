@@ -268,6 +268,28 @@ ol {
   gap: 10px;
 }
 
+.leave {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--bad-tint);
+  animation: screen-in 0.2s ease-out;
+}
+
+.leave__text {
+  flex: 1 1 200px;
+  font-weight: 700;
+  color: var(--bad-shade);
+}
+
+.leave__actions {
+  display: flex;
+  gap: 8px;
+}
+
 .lives {
   display: inline-flex;
   gap: 2px;

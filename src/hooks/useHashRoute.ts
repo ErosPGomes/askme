@@ -22,5 +22,6 @@ export function useHashRoute(): Route {
 }
 
 export function navigate(route: Route): void {
-  window.location.hash = route === "home" ? "/" : `/${route}`;
+  // "#jogar" sem barra: âncora simples é o único formato preservado por hosts embutidos (iframes sandbox).
+  window.location.hash = route === "home" ? "" : route;
 }
