@@ -42,3 +42,24 @@ src/
   components/ roleta, pergunta, HUD, resultados, bandeira, ícones
   screens/    Home, ClassicGame, Practice, Study
 ```
+
+## Céu de Aço (`/jet/`)
+
+Jogo de combate aéreo a baixa altitude em Three.js, segunda página do mesmo build (`jet/index.html`).
+
+- **Missão**: neutralizar as bases A, B e C (antiaéreas, blindados, combustível) e derrubar ondas de caças com IA crescente.
+- **Armas**: canhão com superaquecimento, 2 trilhos de míssil com trava (1,3 s no cone) e recarga, flares contra mísseis.
+- **Controles**: teclado/mouse, toque (manche virtual + trilho de potência + botões) e gamepad, sem configuração.
+- **Mundo procedural**: 18 × 18 km, lavouras em grade com fileiras de plantio no shader, fazendas com silos, cercas vivas, serras na borda. Nenhum asset 3D ou de áudio baixado.
+
+```
+src/jet/
+  flight.ts   modelo de voo (empuxo/arrasto/gravidade, estol, modo arcade) — testado
+  terrain.ts  grade de alturas compartilhada entre malha e colisão — testado
+  fields.ts   layout das lavouras + textura RGBA (alfa = orientação das fileiras)
+  world.ts    céu, luz, árvores/fazendas instanciadas, nuvens
+  ai.ts       piloto inimigo bank-to-turn com prioridades (chão > arena > evasão > ataque)
+  weapons.ts  projéteis (teste por segmento), mísseis com antecipação, flares
+  particles.ts / effects.ts  billboards instanciados (1 draw call por fila)
+  hud.ts      HUD em canvas 2D; input.ts; audio.ts (Web Audio sintetizado); game.ts; main.ts
+```
