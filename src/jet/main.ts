@@ -112,9 +112,15 @@ function start(): void {
   sfx.setMuted(!settings.sound);
   if (input.touchMode) {
     // Tela cheia e paisagem são opcionais: navegadores/app views podem recusar.
-    document.documentElement.requestFullscreen?.().catch(() => undefined);
-    const orientation = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> };
-    orientation.lock?.("landscape").catch(() => undefined);
+    // iOS Safari < 16.4 não tem screen.orientation; navegadores antigos retornam void em vez de Promise.
+    // try + Promise.resolve cobre exceção síncrona e rejeição assíncrona sem bloquear a decolagem.
+    try {
+      void Promise.resolve(document.documentElement.requestFullscreen?.()).catch(() => undefined);
+      const orientation = screen.orientation as (ScreenOrientation & { lock?: (o: string) => Promise<void> }) | undefined;
+      void Promise.resolve(orientation?.lock?.("landscape")).catch(() => undefined);
+    } catch {
+      /* opcional */
+    }
   }
   input.reset(START_THROTTLE);
   game.newGame(START_THROTTLE);
@@ -177,6 +183,8 @@ window.addEventListener("resize", resize);
 
 let last = performance.now();
 function frame(now: number): void {
+  // Agenda o próximo quadro antes de tudo: uma exceção isolada não congela o jogo inteiro.
+  requestAnimationFrame(frame);
   // dt limitado a 50 ms: uma aba que volta do segundo plano não "teleporta" aviões através do chão.
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
@@ -190,7 +198,6 @@ function frame(now: number): void {
     }
     game.render();
   }
-  requestAnimationFrame(frame);
 }
 
 async function boot(): Promise<void> {

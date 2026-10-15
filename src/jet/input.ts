@@ -35,6 +35,7 @@ export class Input {
   private readonly padPrev: boolean[] = [];
   private readonly stickRadius = 64;
   private throttleFill: HTMLElement | null = null;
+  private gamepadAllowed = true;
 
   constructor(ui: TouchUI | null, onDeviceChange: (touch: boolean) => void) {
     const setTouch = (t: boolean) => {
@@ -159,7 +160,7 @@ export class Input {
     let padYaw = 0;
     let padGun = false;
     const padEdge: boolean[] = [];
-    const pad = navigator.getGamepads?.().find((p) => p?.connected) ?? null;
+    const pad = this.readGamepad();
     if (pad) {
       padX = dz(pad.axes[0] ?? 0);
       padY = dz(pad.axes[1] ?? 0);
@@ -196,6 +197,20 @@ export class Input {
     };
     this.edges.clear();
     return frame;
+  }
+
+  /**
+   * Em iframes com Permissions-Policy `gamepad=()` (ex.: visualizadores embutidos), getGamepads() lança
+   * NotAllowedError. Após a primeira recusa o polling é desligado: sem custo de exceção a cada quadro.
+   */
+  private readGamepad(): Gamepad | null {
+    if (!this.gamepadAllowed) return null;
+    try {
+      return navigator.getGamepads?.().find((p) => p?.connected) ?? null;
+    } catch {
+      this.gamepadAllowed = false;
+      return null;
+    }
   }
 
   reset(throttle: number): void {
